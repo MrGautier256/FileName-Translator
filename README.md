@@ -38,7 +38,8 @@ File Name Translator is a Python application that renames files in a specified d
    - Select the destination language from the dropdown menu.
    - Browse and select the directory containing the files you want to rename.
    - Check the "Include Subfolders" option if you want to rename files in subfolders as well.
-   - Click the "Start Renaming" button to begin the renaming process.
+   - Click the "Start" button to begin the renaming process.
+   - Click the "Stop" button to stop the renaming process before the end.
 
 ## License
 
@@ -48,4 +49,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Acknowledgements
 
 - This project uses the [deep_translator](https://pypi.org/project/deep-translator/) library for language translation.
-- The GUI is built using the [tkinter](https://docs.python.org/3/library/tkinter.html) library.
