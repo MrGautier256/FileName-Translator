@@ -30,8 +30,7 @@ class RenamingThread(QtCore.QThread):
                     break
                 try:
                     file_name, file_extension = os.path.splitext(filename)
-                    translated_name = self.translate_file_name(
-                        file_name, translator)
+                    translated_name = translator.translate(file_name)
                     new_filename = f"{translated_name}{file_extension}"
                     os.rename(os.path.join(root, filename),
                               os.path.join(root, new_filename))
@@ -51,13 +50,3 @@ class RenamingThread(QtCore.QThread):
 
     def stop(self):
         self.stop_renaming = True
-
-    def translate_file_name(self, file_name, translator):
-        words = file_name.split()
-        translated_words = []
-        for word in words:
-            translated_word = translator.translate(word)
-            if translated_word is None:
-                translated_word = word
-            translated_words.append(translated_word)
-        return ' '.join(translated_words)
