@@ -1,57 +1,5 @@
-import os
-from PyQt5 import QtWidgets, QtGui, QtCore
-from deep_translator import GoogleTranslator
-
-
-class RenamingThread(QtCore.QThread):
-    progress_updated = QtCore.pyqtSignal(int)
-    label_updated = QtCore.pyqtSignal(str)
-    renaming_done = QtCore.pyqtSignal(bool)
-
-    def __init__(self, directory, src_lang, dest_lang, include_subfolders):
-        super().__init__()
-        self.directory = directory
-        self.src_lang = src_lang
-        self.dest_lang = dest_lang
-        self.include_subfolders = include_subfolders
-        self.stop_renaming = False
-
-    def run(self):
-        translator = GoogleTranslator(
-            source=self.src_lang, target=self.dest_lang)
-        total_files = sum([len(files) for r, d, files in os.walk(
-            self.directory) if self.include_subfolders or r == self.directory])
-        self.progress_updated.emit(0)
-        progress_value = 0
-
-        for root, _, files in os.walk(self.directory):
-            for filename in files:
-                if self.stop_renaming:
-                    break
-                try:
-                    file_name, file_extension = os.path.splitext(filename)
-                    translated_name_parts = [translator.translate(
-                        word) or word for word in file_name.split()]
-                    translated_name = ' '.join(translated_name_parts)
-                    new_filename = f"{translated_name}{file_extension}"
-                    os.rename(os.path.join(root, filename),
-                              os.path.join(root, new_filename))
-                    print(f'Renamed "{filename}" to "{new_filename}"')
-                except Exception as e:
-                    print(f'Error renaming "{filename}": {e}')
-
-                progress_value += 1
-                percentage = int((progress_value / total_files) * 100)
-                self.progress_updated.emit(percentage)
-                self.label_updated.emit(f"{percentage}%")
-
-            if self.stop_renaming:
-                break
-
-        self.renaming_done.emit(not self.stop_renaming)
-
-    def stop(self):
-        self.stop_renaming = True
+from PyQt5 import QtWidgets, QtCore
+from renaming_thread import RenamingThread
 
 
 class FileNameTranslatorApp(QtWidgets.QWidget):
@@ -62,13 +10,15 @@ class FileNameTranslatorApp(QtWidgets.QWidget):
 
     def init_ui(self):
         self.setWindowTitle('File Name Translator')
-        self.setGeometry(100, 100, 700, 350)
+        self.setGeometry(100, 100, 800, 400)
 
+        # Set main layout
         main_layout = QtWidgets.QVBoxLayout()
         form_layout = QtWidgets.QFormLayout()
         button_layout = QtWidgets.QHBoxLayout()
         progress_layout = QtWidgets.QHBoxLayout()
 
+        # Define widgets
         self.src_lang_label = QtWidgets.QLabel('Source Language:')
         self.dest_lang_label = QtWidgets.QLabel('Destination Language:')
         self.dir_label = QtWidgets.QLabel('Directory:')
@@ -78,37 +28,99 @@ class FileNameTranslatorApp(QtWidgets.QWidget):
         self.browse_button = QtWidgets.QPushButton('Browse')
         self.include_subfolders_check = QtWidgets.QCheckBox(
             'Include Subfolders')
-        self.start_button = QtWidgets.QPushButton('Start Renaming')
-        self.stop_button = QtWidgets.QPushButton('Stop Renaming')
+        self.start_button = QtWidgets.QPushButton('Start')
+        self.stop_button = QtWidgets.QPushButton('Stop')
         self.progress_bar = QtWidgets.QProgressBar()
         self.progress_label = QtWidgets.QLabel('0%')
 
+        # Set language options
         languages = ['en', 'fr', 'es', 'de',
                      'it', 'pt', 'nl', 'ru', 'ja', 'zh-cn']
         self.src_lang_combo.addItems(languages)
         self.dest_lang_combo.addItems(languages)
 
+        # Connect buttons to functions
         self.browse_button.clicked.connect(self.browse_directory)
         self.start_button.clicked.connect(self.start_renaming)
         self.stop_button.clicked.connect(self.stop_renaming_process)
 
+        # Add widgets to form layout
         form_layout.addRow(self.src_lang_label, self.src_lang_combo)
         form_layout.addRow(self.dest_lang_label, self.dest_lang_combo)
         form_layout.addRow(self.dir_label, self.dir_edit)
         form_layout.addRow('', self.browse_button)
         form_layout.addRow('', self.include_subfolders_check)
+        form_layout.setSpacing(20)  # Add spacing between form rows
 
+        # Add buttons to button layout
         button_layout.addWidget(self.start_button)
         button_layout.addWidget(self.stop_button)
+        button_layout.setSpacing(20)  # Add spacing between buttons
 
+        # Add progress bar and label to progress layout
         progress_layout.addWidget(self.progress_bar)
         progress_layout.addWidget(self.progress_label)
 
+        # Add all layouts to main layout
         main_layout.addLayout(form_layout)
         main_layout.addLayout(button_layout)
         main_layout.addLayout(progress_layout)
+        # Add margins to main layout
+        main_layout.setContentsMargins(10, 10, 10, 10)
 
+        # Set main layout to the widget
         self.setLayout(main_layout)
+
+        # Apply styles
+        self.apply_styles()
+
+    def apply_styles(self):
+        # Set stylesheet for the application
+        self.setStyleSheet("""
+            QWidget {
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                background-color: #2b2b2b;
+                color: #d3d3d3;
+            }
+            QLabel {
+                color: #d3d3d3;
+            }
+            QLineEdit, QComboBox {
+                border: 1px solid #555;
+                border-radius: 4px;
+                padding: 8px;  /* Increased padding for better spacing */
+                background-color: #3b3b3b;
+                color: #d3d3d3;
+            }
+            QPushButton {
+                background-color: #555;
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #777;
+            }
+            QProgressBar {
+                height: 40px;  /* Further increased height for the progress bar */
+                border: 1px solid #777;
+                border-radius: 5px;
+                text-align: center;  /* Centered text within progress bar */
+                color: transparent;  /* Hide the text within the progress bar */
+                background-color: #3b3b3b;
+            }
+            QProgressBar::chunk {
+                background-color: #5a9;
+                width: 20px;
+                margin: 1px;
+            }
+            QCheckBox {
+                color: #d3d3d3;
+            }
+        """)
 
     def browse_directory(self):
         directory = QtWidgets.QFileDialog.getExistingDirectory(
@@ -161,10 +173,3 @@ class FileNameTranslatorApp(QtWidgets.QWidget):
         if self.renaming_thread and self.renaming_thread.isRunning():
             self.renaming_thread.stop()
         event.accept()
-
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
-    window = FileNameTranslatorApp()
-    window.show()
-    app.exec_()

@@ -6,36 +6,32 @@ File Name Translator is a Python application that renames files in a specified d
 
 - Translate file names from one language to another.
 - Support for multiple languages.
-- Option to include subfolders in the renaming process.
-- Easy-to-use GUI.
+- Include or exclude subfolders.
+- Progress bar to show the translation progress.
+- Start and stop the renaming process.
 
 ## Installation
 
 1. Clone the repository:
 
-   ```sh
-   git clone https://github.com/MrGautier256/FileName-Translator.git
-   cd FileName-Translator
-   ```
+    ```sh
+    git clone https://github.com/yourusername/FileName-Translator.git
+    cd FileName-Translator
+    ```
 
 2. Install the required dependencies:
 
-   ```sh
-   pip install -r requirements.txt
-   ```
-
-   The `requirements.txt` file should contain:
-   ```sh
-   deep-translator
-   ```
+    ```sh
+    pip install -r requirements.txt
+    ```
 
 ## Usage
 
 1. Run the application:
 
    ```sh
-   python FileName_Translator.py
-   ```
+    python src/main.py
+    ```
 
 2. In the GUI:
    - Select the source language from the dropdown menu.
