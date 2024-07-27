@@ -1,1 +1,3 @@
 deep-translator
+tkinter
+ttkthemes
